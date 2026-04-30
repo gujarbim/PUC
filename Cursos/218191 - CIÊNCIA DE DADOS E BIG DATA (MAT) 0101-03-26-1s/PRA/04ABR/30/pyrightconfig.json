@@ -1,0 +1,13 @@
+{
+    "typeCheckingMode": "basic",
+    "reportUnknownVariableType": "none",
+    "reportUnknownMemberType": "none",
+    "reportUnknownArgumentType": "none",
+    "reportUnknownParameterType": "none",
+    "reportMissingTypeStubs": "none",
+    "reportGeneralTypeIssues": "none",
+    "reportAttributeAccessIssue": "none",
+    "reportOperatorIssue": "none",
+    "reportReturnType": "none",
+    "reportIndexIssue": "none"
+}
