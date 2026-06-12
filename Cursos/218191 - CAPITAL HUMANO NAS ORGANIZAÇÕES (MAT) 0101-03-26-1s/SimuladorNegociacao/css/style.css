@@ -39,6 +39,7 @@ body {
     align-items: center;
     justify-content: center;
     padding: 2rem;
+    overflow-y: auto;
     overflow-x: hidden;
     position: relative;
 }
@@ -81,6 +82,7 @@ body::before {
     z-index: 1;
     backdrop-filter: blur(20px);
     overflow: hidden;
+    margin: auto;
 }
 
 /* Header Section */
@@ -229,16 +231,16 @@ body::before {
 .main-grid {
     display: grid;
     grid-template-columns: 310px 1fr 360px;
-    height: 750px; /* Fixed Height to constrain viewport and enable panel scrolling */
+    height: 700px; /* Reduced fixed height for standard PC screen compatibility */
     background: rgba(2, 6, 23, 0.1);
 }
 
 /* General Panels */
 .panel {
-    padding: 2rem 1.75rem;
+    padding: 1.5rem 1.25rem; /* Reduced padding for compact layout */
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 1.25rem; /* Reduced gap between panel elements */
     position: relative;
 }
 
@@ -258,15 +260,16 @@ body::before {
 .panel-left {
     border-right: 1px solid var(--panel-border);
     background: rgba(10, 15, 30, 0.4);
+    overflow-y: auto; /* Allow internal scrolling if inputs overflow 700px */
 }
 
 .input-section {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem; /* More compact gap */
     background: rgba(15, 23, 42, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.03);
-    padding: 1.25rem;
+    padding: 1rem 1.15rem; /* More compact padding */
     border-radius: 16px;
 }
 
@@ -513,6 +516,7 @@ body::before {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    overflow-y: auto; /* Scrollable fallback for small viewports */
 }
 
 /* Central Decision/Verdict Card */
@@ -520,7 +524,7 @@ body::before {
     background: rgba(15, 23, 42, 0.4);
     border: 1px solid var(--panel-border);
     border-radius: 20px;
-    padding: 2.25rem;
+    padding: 1.5rem; /* Reduced padding from 2.25rem */
     text-align: center;
     position: relative;
     overflow: hidden;
@@ -578,7 +582,7 @@ body::before {
     border: 0;
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--panel-border), transparent);
-    margin: 1.5rem 0;
+    margin: 1rem 0; /* Reduced margin from 1.5rem */
     position: relative;
     z-index: 1;
 }
@@ -587,7 +591,7 @@ body::before {
 .checklist {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem; /* Reduced gap from 0.75rem */
     align-items: center;
     z-index: 1;
     position: relative;
@@ -641,7 +645,7 @@ body::before {
     background: rgba(15, 23, 42, 0.3);
     border: 1px solid var(--panel-border);
     border-radius: 16px;
-    padding: 1.5rem;
+    padding: 1.15rem; /* Reduced padding from 1.5rem */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -743,7 +747,7 @@ body::before {
 .canvas-holder {
     position: relative;
     width: 100%;
-    height: 170px;
+    height: 140px; /* Reduced from 170px to fit grid height perfectly */
     display: flex;
     justify-content: center;
     align-items: center;
