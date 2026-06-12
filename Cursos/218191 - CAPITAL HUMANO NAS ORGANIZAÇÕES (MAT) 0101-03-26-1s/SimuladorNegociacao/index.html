@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HUD Tático de Negociação - SuperMotors S.A.</title>
+    <!-- Google Fonts: Outfit (headings), Inter (body), JetBrains Mono (numbers) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="glow-bg-radial"></div>
+
+<div class="dashboard">
+    <!-- Header Section -->
+    <header class="header">
+        <div class="logo-area">
+            <div class="pulse-indicator"></div>
+            <div>
+                <h1>SuperMotors <span class="brand-accent">S.A.</span></h1>
+                <p class="subtitle font-mono">HUD TÁTICO DE NEGOCIAÇÃO V1.2</p>
+            </div>
+        </div>
+        
+        <!-- Timeline status based on case -->
+        <div class="timeline-container">
+            <div class="timeline-point">
+                <span class="point-label">Negociação</span>
+                <span class="point-value font-mono">26/07/2026</span>
+            </div>
+            <div class="timeline-connector">
+                <div class="connector-progress"></div>
+                <span class="connector-days font-mono">49 Dias Limite</span>
+            </div>
+            <div class="timeline-point end-point">
+                <span class="point-label">Prazo México</span>
+                <span class="point-value font-mono">13/09/2026</span>
+            </div>
+        </div>
+
+        <!-- Benchmark Pucaço -->
+        <div class="benchmark-pill">
+            <div class="bench-title">BENCHMARK PUCAÇO (BASE)</div>
+            <div class="bench-values font-mono">
+                <span>R$ 5.000/t</span> | <span>Min 20t</span> | <span>15d Entr.</span> | <span>30d Pgto</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Grid -->
+    <div class="main-grid">
+        
+        <!-- Left Column: Controls/Inputs -->
+        <aside class="panel panel-left">
+            <div class="panel-header">
+                <h2>Parâmetros da Oferta</h2>
+                <p>NegociAço Ltda.</p>
+            </div>
+
+            <div class="input-section">
+                <h3>Condições Comerciais</h3>
+                <div class="input-group has-prefix">
+                    <label for="price">Preço por Tonelada</label>
+                    <div class="input-wrapper">
+                        <span class="prefix">R$</span>
+                        <input type="text" id="price" value="0,00" onkeyup="formatCurrency(this)">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="paymentTime">Prazo de Pagamento</label>
+                    <div class="input-wrapper">
+                        <input type="number" id="paymentTime" value="0" min="0">
+                        <span class="suffix">Dias</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Garantia de Qualidade</label>
+                    <div class="input-wrapper">
+                        <!-- Custom styled premium dropdown to avoid native OS select styling -->
+                        <div class="custom-dropdown" id="qualityDropdown">
+                            <button type="button" class="dropdown-trigger">
+                                <span class="selected-value">Sim (Aço Certificado)</span>
+                                <span class="dropdown-arrow">▼</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-option selected" data-value="yes">Sim (Aço Certificado)</div>
+                                <div class="dropdown-option" data-value="no">Não (Sem Certificação)</div>
+                            </div>
+                            <input type="hidden" id="qualityAssured" value="yes">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <h3>Lote 1 <span class="badge badge-urgent">Urgente</span></h3>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="l1Quantity">Qtd. (Min 30t)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="l1Quantity" value="0" min="0">
+                            <span class="suffix">Ton</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="l1Delivery">Prazo (Max 7d)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="l1Delivery" value="0" min="0">
+                            <span class="suffix">Dias</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <h3>Lote 2 <span class="badge badge-secondary">Saldo</span></h3>
+                <div class="input-row">
+                    <div class="input-group">
+                        <label for="l2Quantity">Qtd. Restante</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="l2Quantity" value="0" min="0">
+                            <span class="suffix">Ton</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="l2Delivery">Prazo (Max 19d)</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="l2Delivery" value="0" min="0">
+                            <span class="suffix">Dias</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="helper-text">
+                    * Todo o aço deve chegar em até 19 dias para permitir os 30 dias de produção interna.
+                </div>
+            </div>
+        </aside>
+
+        <!-- Center Column: Veredicto & KPIs -->
+        <main class="panel panel-center">
+            <!-- Central Decision Card -->
+            <div class="verdict-card" id="verdict-container">
+                <div class="verdict-glow"></div>
+                <div class="verdict-header">VEREDICTO DA NEGOCIAÇÃO</div>
+                <div class="verdict-title" id="verdict-title">CONTRATO APROVADO</div>
+                
+                <hr class="divider">
+                
+                <div class="checklist" id="checklist">
+                    <div class="check-item ok" id="chk-quality">
+                        <span class="icon font-mono">✓</span> Garantia de qualidade confirmada
+                    </div>
+                    <div class="check-item ok" id="chk-l1-qty">
+                        <span class="icon font-mono">✓</span> Lote 1 Mínimo de 30t atendido
+                    </div>
+                    <div class="check-item ok" id="chk-l1-time">
+                        <span class="icon font-mono">✓</span> Prazo Lote 1 dentro de 7d (Urgente)
+                    </div>
+                    <div class="check-item ok" id="chk-l2-time">
+                        <span class="icon font-mono">✓</span> Prazo Lote 2 dentro dos 19d limite
+                    </div>
+                    <div class="check-item ok" id="chk-total-qty">
+                        <span class="icon font-mono">✓</span> Volume total de 50t garantido
+                    </div>
+                    <div class="check-item ok" id="chk-price">
+                        <span class="icon font-mono">✓</span> Preço viável (abaixo ou igual à Pucaço)
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPIs Matrix -->
+            <div class="kpis-grid">
+                <div class="kpi-card" id="kpi-l1">
+                    <div class="kpi-glow"></div>
+                    <span class="kpi-label">Urgência (Lote 1)</span>
+                    <div class="kpi-value font-mono" id="val-l1">SALVO</div>
+                    <span class="kpi-sub" id="sub-l1">30 Ton em 7 dias</span>
+                </div>
+
+                <div class="kpi-card" id="kpi-l2">
+                    <div class="kpi-glow"></div>
+                    <span class="kpi-label">Produção Total (Lote 2)</span>
+                    <div class="kpi-value font-mono" id="val-l2">DENTRO DO PRAZO</div>
+                    <span class="kpi-sub" id="sub-l2">Restante em 15 dias</span>
+                </div>
+
+                <div class="kpi-card" id="kpi-price">
+                    <div class="kpi-glow"></div>
+                    <span class="kpi-label">Diferencial vs Pucaço</span>
+                    <div class="kpi-value font-mono" id="val-price">R$ 0,00</div>
+                    <span class="kpi-sub" id="sub-price">Empate financeiro</span>
+                </div>
+
+                <div class="kpi-card" id="kpi-payment">
+                    <div class="kpi-glow"></div>
+                    <span class="kpi-label">Fluxo de Caixa</span>
+                    <div class="kpi-value font-mono" id="val-payment">30 DIAS PGTO</div>
+                    <span class="kpi-sub" id="sub-payment">Padrão da base mantido</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Column: Visual Analytics / Charts -->
+        <aside class="panel panel-right">
+            <div class="panel-header">
+                <h2>Análise Visual</h2>
+                <p>Métricas Multidimensionais</p>
+            </div>
+
+            <div class="charts-container">
+                <!-- Radar Score Chart -->
+                <div class="chart-wrapper-card">
+                    <div class="chart-title">Desempenho da Proposta (0-100)</div>
+                    <div class="canvas-holder">
+                        <canvas id="radarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Lote Distribution -->
+                <div class="chart-wrapper-card">
+                    <div class="chart-title">Logística de Abastecimento (Ton)</div>
+                    <div class="canvas-holder">
+                        <canvas id="doughnutChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Cost Comparison -->
+                <div class="chart-wrapper-card">
+                    <div class="chart-title">Custo Total da Compra (50 Ton)</div>
+                    <div class="canvas-holder">
+                        <canvas id="costChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
