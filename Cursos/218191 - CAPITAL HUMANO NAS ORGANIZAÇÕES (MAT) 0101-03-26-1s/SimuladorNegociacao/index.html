@@ -22,20 +22,26 @@
         <div class="logo-area">
             <div class="pulse-indicator"></div>
             <div>
-                <h1>SuperMotors <span class="brand-accent">S.A.</span></h1>
-                <p class="subtitle font-mono">HUD TÁTICO DE NEGOCIAÇÃO V1.2</p>
+                <h1>
+                    SuperMotors <span class="brand-accent">S.A.</span>
+                    <span class="info-icon" id="openSuperMotorsModalBtn" title="Ver Restrições & Demandas da SuperMotors" style="margin-left: 6px; font-size: 0.55em; width: 14px; height: 14px; vertical-align: middle;">?</span>
+                </h1>
+                <p class="subtitle font-mono">HUD TÁTICO DE NEGOCIAÇÃO</p>
             </div>
         </div>
         
         <!-- Timeline status based on case -->
-        <div class="timeline-container">
+        <div class="timeline-container" id="timelineWidget" style="cursor: pointer;" title="Clique para ver detalhes do Cronograma">
             <div class="timeline-point">
                 <span class="point-label">Negociação</span>
                 <span class="point-value font-mono">26/07/2026</span>
             </div>
             <div class="timeline-connector">
                 <div class="connector-progress"></div>
-                <span class="connector-days font-mono">49 Dias Limite</span>
+                <span class="connector-days font-mono">
+                    49 Dias Limite 
+                    <span class="info-icon" id="openTimelineModalBtn" style="font-size: 0.85em; width: 12px; height: 12px; margin-left: 3px; vertical-align: middle;">?</span>
+                </span>
             </div>
             <div class="timeline-point end-point">
                 <span class="point-label">Prazo México</span>
@@ -44,10 +50,13 @@
         </div>
 
         <!-- Benchmark Pucaço -->
-        <div class="benchmark-pill">
-            <div class="bench-title">BENCHMARK PUCAÇO (BASE)</div>
+        <div class="benchmark-pill" id="benchmarkPill" style="cursor: pointer;" title="Clique para preencher as condições da Pucaço">
+            <div class="bench-title">
+                BENCHMARK PUCAÇO (BASE)
+                <span class="info-icon" id="openBenchmarkModalBtn" title="Ver Detalhes do Caso/Documento" style="margin-left: 6px;">?</span>
+            </div>
             <div class="bench-values font-mono">
-                <span>R$ 5.000/t</span> | <span>Min 20t</span> | <span>15d Entr.</span> | <span>30d Pgto</span>
+                <span>R$ 5.000/t</span> <span class="bench-separator">|</span> <span>Min 20t</span> <span class="bench-separator">|</span> <span>15d Entr.</span> <span class="bench-separator">|</span> <span>30d Pgto</span>
             </div>
         </div>
     </header>
@@ -58,7 +67,10 @@
         <!-- Left Column: Controls/Inputs -->
         <aside class="panel panel-left">
             <div class="panel-header">
-                <h2>Parâmetros da Oferta</h2>
+                <h2>
+                    Parâmetros da Oferta
+                    <span class="info-icon" id="openParamsModalBtn" title="Ver Regras & Fórmulas dos Parâmetros" style="margin-left: 6px; font-size: 0.55em; width: 14px; height: 14px; vertical-align: middle;">?</span>
+                </h2>
                 <p>NegociAço Ltda.</p>
             </div>
 
@@ -68,14 +80,14 @@
                     <label for="price">Preço por Tonelada</label>
                     <div class="input-wrapper">
                         <span class="prefix">R$</span>
-                        <input type="text" id="price" value="0,00" onkeyup="formatCurrency(this)">
+                        <input type="text" id="price" value="0,00" onkeyup="formatCurrency(this)" inputmode="decimal">
                     </div>
                 </div>
 
                 <div class="input-group">
                     <label for="paymentTime">Prazo de Pagamento</label>
                     <div class="input-wrapper">
-                        <input type="number" id="paymentTime" value="0" min="0">
+                        <input type="number" id="paymentTime" value="0" min="0" inputmode="numeric" pattern="[0-9]*">
                         <span class="suffix">Dias</span>
                     </div>
                 </div>
@@ -105,14 +117,14 @@
                     <div class="input-group">
                         <label for="l1Quantity">Qtd. (Min 30t)</label>
                         <div class="input-wrapper">
-                            <input type="number" id="l1Quantity" value="0" min="0">
+                            <input type="number" id="l1Quantity" value="0" min="0" inputmode="numeric" pattern="[0-9]*">
                             <span class="suffix">Ton</span>
                         </div>
                     </div>
                     <div class="input-group">
                         <label for="l1Delivery">Prazo (Max 7d)</label>
                         <div class="input-wrapper">
-                            <input type="number" id="l1Delivery" value="0" min="0">
+                            <input type="number" id="l1Delivery" value="0" min="0" inputmode="numeric" pattern="[0-9]*">
                             <span class="suffix">Dias</span>
                         </div>
                     </div>
@@ -125,14 +137,14 @@
                     <div class="input-group">
                         <label for="l2Quantity">Qtd. Restante</label>
                         <div class="input-wrapper">
-                            <input type="number" id="l2Quantity" value="0" min="0">
+                            <input type="number" id="l2Quantity" value="0" min="0" inputmode="numeric" pattern="[0-9]*">
                             <span class="suffix">Ton</span>
                         </div>
                     </div>
                     <div class="input-group">
                         <label for="l2Delivery">Prazo (Max 19d)</label>
                         <div class="input-wrapper">
-                            <input type="number" id="l2Delivery" value="0" min="0">
+                            <input type="number" id="l2Delivery" value="0" min="0" inputmode="numeric" pattern="[0-9]*">
                             <span class="suffix">Dias</span>
                         </div>
                     </div>
@@ -151,26 +163,40 @@
                 <div class="verdict-header">VEREDICTO DA NEGOCIAÇÃO</div>
                 <div class="verdict-title" id="verdict-title">CONTRATO APROVADO</div>
                 
+                <!-- Gamified Negotiation Score -->
+                <div class="score-container">
+                    <div class="score-header">
+                        <span>EFICIÊNCIA DA NEGOCIAÇÃO <span class="info-icon" id="openModalBtn" title="Entenda a Fórmula">?</span></span>
+                        <span class="score-value font-mono" id="score-value">0%</span>
+                    </div>
+                    <div class="score-bar-bg">
+                        <div class="score-bar-fill" id="score-bar"></div>
+                    </div>
+                </div>
+                
                 <hr class="divider">
                 
                 <div class="checklist" id="checklist">
                     <div class="check-item ok" id="chk-quality">
-                        <span class="icon font-mono">✓</span> Garantia de qualidade confirmada
+                        <span class="icon font-mono">✓</span> <span class="check-text">Garantia de qualidade confirmada</span>
                     </div>
                     <div class="check-item ok" id="chk-l1-qty">
-                        <span class="icon font-mono">✓</span> Lote 1 Mínimo de 30t atendido
+                        <span class="icon font-mono">✓</span> <span class="check-text">Lote 1 Mínimo de 30t atendido</span>
                     </div>
                     <div class="check-item ok" id="chk-l1-time">
-                        <span class="icon font-mono">✓</span> Prazo Lote 1 dentro de 7d (Urgente)
+                        <span class="icon font-mono">✓</span> <span class="check-text">Prazo Lote 1 dentro de 7d (Urgente)</span>
                     </div>
                     <div class="check-item ok" id="chk-l2-time">
-                        <span class="icon font-mono">✓</span> Prazo Lote 2 dentro dos 19d limite
+                        <span class="icon font-mono">✓</span> <span class="check-text">Prazo Lote 2 dentro dos 19d limite</span>
                     </div>
                     <div class="check-item ok" id="chk-total-qty">
-                        <span class="icon font-mono">✓</span> Volume total de 50t garantido
+                        <span class="icon font-mono">✓</span> <span class="check-text">Volume total de 50t garantido</span>
                     </div>
                     <div class="check-item ok" id="chk-price">
-                        <span class="icon font-mono">✓</span> Preço viável (abaixo ou igual à Pucaço)
+                        <span class="icon font-mono">✓</span> <span class="check-text">Preço viável (abaixo ou igual à Pucaço)</span>
+                    </div>
+                    <div class="check-item ok" id="chk-payment">
+                        <span class="icon font-mono">✓</span> <span class="check-text">Prazo de faturamento viável (mínimo 30d ou compensado)</span>
                     </div>
                 </div>
             </div>
@@ -241,6 +267,226 @@
             </div>
         </aside>
 
+    </div>
+</div>
+
+<!-- Formula Explanation Modal -->
+<div class="modal-overlay" id="formulaModal">
+    <div class="modal-content">
+        <button class="modal-close" id="closeModalBtn" title="Fechar">&times;</button>
+        <h3 class="modal-title">Fórmula de Eficiência</h3>
+        <div class="modal-body">
+            <p class="formula-math">Score = (Preço × 40%) + (Pgto × 20%) + (Lote 1 × 20%) + (Lote 2 × 20%)</p>
+            <div class="formula-details">
+                <div class="detail-item">
+                    <span class="detail-label">💲 Preço por Tonelada (Peso 40%)</span>
+                    <span class="detail-desc">De R$ 4.000 (100% da nota) a R$ 6.000 (0% da nota). Preço menor = nota maior.</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">⏱️ Prazo de Pagamento (Peso 20%)</span>
+                    <span class="detail-desc">De 60 dias (100% da nota) a 0 dias/À Vista (0% da nota). Prazo maior = nota maior.</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">📦 Prazo de Entrega Lote 1 (Peso 20%)</span>
+                    <span class="detail-desc">De 1 dia (100% da nota) a 15 dias (0% da nota). Prazo menor = nota maior.</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🚚 Prazo de Entrega Lote 2 (Peso 20%)</span>
+                    <span class="detail-desc">De 1 dia (100% da nota) a 30 dias (0% da nota). *Sempre 100% se o Lote 2 for dispensado.</span>
+                </div>
+            </div>
+            <div class="modal-alert">
+                <strong>⚠️ Penalidade Crítica de 70%</strong>
+                <p>Se a proposta falhar em qualquer critério eliminatório do Checklist (Garantia de Qualidade, volumes mínimos ou prazos operacionais limites), a nota final da negociação sofre uma redução drástica de 70%.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Benchmark Explanation Modal -->
+<div class="modal-overlay" id="benchmarkModal">
+    <div class="modal-content">
+        <button class="modal-close" id="closeBenchmarkModalBtn" title="Fechar">&times;</button>
+        <h3 class="modal-title">Caso & Condições Pucaço</h3>
+        <div class="modal-body">
+            <div class="formula-details">
+                <div class="detail-item">
+                    <span class="detail-label">💲 Preço: R$ 5.000,00 / tonelada</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"A proposta da Pucaço S.A., parceiro comercial tradicional da SuperMotors, é de R$ 5.000,00 por tonelada."</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">📦 Pedido Mínimo: Mínimo 20 Toneladas</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"...pedido mínimo de 20 toneladas." <br><strong>*Nota:</strong> O caso exige 50t no total para a SuperMotors.</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">⏱️ Prazo de Entrega: 15 Dias</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"...e prazo de entrega de 15 dias. Com isso, os lotes adicionais demorariam pelo menos 15 dias para serem entregues." <br><strong>*Nota:</strong> Isso inviabiliza o Lote 1 urgente (necessita 30t em até 7 dias) para evitar parada de fábrica.</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">💳 Prazo de Pagamento: 30 Dias</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"A Pucaço oferece o prazo de faturamento tradicional de 30 dias..."</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🛡️ Qualidade: Garantida e Inegociável</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"...sem abrir mão, em hipótese nenhuma, da qualidade."</span>
+                </div>
+            </div>
+            <div class="modal-alert" style="background: rgba(56, 189, 248, 0.08); border-color: rgba(56, 189, 248, 0.15);">
+                <strong style="color: var(--primary);">🎯 Meta da Negociação</strong>
+                <p>Superar as condições comerciais da Pucaço (preço menor ou prazo de pagamento maior) atendendo obrigatoriamente a urgência logística da SuperMotors: Lote 1 de 30t em até 7 dias, e Lote 2 (20t) em até 19 dias.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SuperMotors Explanation Modal -->
+<div class="modal-overlay" id="superMotorsModal">
+    <div class="modal-content">
+        <button class="modal-close" id="closeSuperMotorsModalBtn" title="Fechar">&times;</button>
+        <h3 class="modal-title">Demandas da SuperMotors S.A.</h3>
+        <div class="modal-body">
+            <div class="formula-details">
+                <div class="detail-item">
+                    <span class="detail-label">📦 Demanda Total: 50 Toneladas</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"O restante do saldo da demanda (20 toneladas) precisa ser entregue em até 19 dias para somar o lote completo de 50 toneladas."</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🚨 Lote 1 (Urgente): Mínimo 30t em até 7 dias</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"Para manter a linha de montagem em funcionamento, a fábrica necessita urgentemente de um lote mínimo de 30 toneladas de aço especial em no máximo 7 dias..."</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🚚 Lote 2 (Saldo): Restante em até 19 dias</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"O restante do saldo da demanda (20 toneladas) precisa ser entregue em até 19 dias..." <br><strong>*Nota:</strong> Prazo operacional limite para a produção interna.</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">⏱️ Prazo México: Exatamente 49 dias</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"Temos exatamente 49 dias para entregar o lote completo no México (13 de setembro). Como a nossa produção interna consome 30 dias, todo o aço especial deve ser entregue na fábrica em no máximo 19 dias (14 de agosto)."</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🛡️ Qualidade: Inegociável</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"...sem abrir mão, em hipótese nenhuma, da qualidade." <br><strong>*Nota:</strong> Falhar na certificação de qualidade inviabiliza o contrato de imediato.</span>
+                </div>
+            </div>
+            <div class="modal-alert" style="background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.15);">
+                <strong style="color: var(--success);">🎯 Objetivo Operacional</strong>
+                <p>Garantir que a linha de montagem da SuperMotors não pare no 7º dia e que as 50t cheguem a tempo do ciclo interno de 30 dias antes do embarque final para o México.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Timeline Explanation Modal -->
+<div class="modal-overlay" id="timelineModal">
+    <div class="modal-content">
+        <button class="modal-close" id="closeTimelineModalBtn" title="Fechar">&times;</button>
+        <h3 class="modal-title">Cronograma & Prazos Críticos</h3>
+        <div class="modal-body">
+            <div class="formula-details">
+                <div class="detail-item">
+                    <span class="detail-label">📅 26/07/2026: Reunião de Negociação</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"A reunião [...] ocorrerá no dia 26 de julho de 2026." <br><strong>*Nota:</strong> Marco inicial do cronograma de 49 dias.</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🚨 02/08/2026: Limite Urgente (Lote 1)</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"...lote mínimo de 30 toneladas de aço especial em no máximo 7 dias (até 2 de agosto) para evitar a parada da linha de montagem..."</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🚚 14/08/2026: Limite de Produção (Lote 2)</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"Como a nossa produção interna consome 30 dias, todo o aço especial deve ser entregue na fábrica em no máximo 19 dias (14 de agosto)."</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🚢 13/09/2026: Entrega Final no México</span>
+                    <span class="detail-desc" style="font-style: italic; opacity: 0.85; margin-top: 2px;">"Temos exatamente 49 dias para entregar o lote completo no México (13 de setembro)."</span>
+                </div>
+            </div>
+            <div class="modal-alert" style="background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.15);">
+                <strong style="color: var(--warning);">⏳ Lógica Operacional do Prazo</strong>
+                <p>49 dias (Prazo México) - 30 dias (Produção Interna) = 19 dias. Qualquer entrega de saldo após o 19º dia atrasa o embarque final e quebra o contrato.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Parameters Explanation Modal -->
+<div class="modal-overlay" id="paramsModal">
+    <div class="modal-content" style="max-width: 500px;">
+        <button class="modal-close" id="closeParamsModalBtn" title="Fechar">&times;</button>
+        <h3 class="modal-title">Fórmulas e Regras dos Parâmetros</h3>
+        <div class="modal-body">
+            <div class="formula-details">
+                <div class="detail-item">
+                    <span class="detail-label">💲 Preço por Tonelada (Peso 40%)</span>
+                    <span class="detail-desc">
+                        Fórmula: <code style="font-family: var(--font-mono); color: var(--primary);">Nota = 100 - ((Preço - 4000) / 2000 * 100)</code><br>
+                        Calculado sobre o intervalo de R$ 4.000 (Nota 100) a R$ 6.000 (Nota 0). O preço base da Pucaço é R$ 5.000. Qualquer preço acima disso aciona alerta comercial (amarelo).
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">⏱️ Prazo de Pagamento (Peso 20%)</span>
+                    <span class="detail-desc">
+                        Fórmula: <code style="font-family: var(--font-mono); color: var(--primary);">Nota = (Prazo / 60) * 100</code><br>
+                        Calculado de 0 dias/à vista (Nota 0) a 60 dias (Nota 100).<br>
+                        <strong>Compensação se &lt; 30 dias:</strong><br>
+                        O custo de capital de <code style="font-family: var(--font-mono); font-size: 0.85em; color: var(--danger);">0,033% ao dia</code> gerado pela redução do prazo em relação à Pucaço (30 dias) deve ser inferior ou igual ao desconto financeiro de preço concedido:<br>
+                        <code style="font-family: var(--font-mono); font-size: 0.85em; color: var(--success);">Desconto &ge; Custo Total &times; (30 - Prazo) &times; 0.00033</code>
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">📦 Lote 1 - Urgente (Peso 20%)</span>
+                    <span class="detail-desc">
+                        Fórmula: <code style="font-family: var(--font-mono); color: var(--primary);">Nota = 100 - ((Prazo L1 - 1) / 14 * 100)</code><br>
+                        <strong>Regra Eliminatória:</strong> Mínimo de 30 toneladas entregues em no máximo 7 dias para evitar a parada imediata da fábrica.
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🚚 Lote 2 - Saldo (Peso 20%)</span>
+                    <span class="detail-desc">
+                        Fórmula: <code style="font-family: var(--font-mono); color: var(--primary);">Nota = 100 - ((Prazo L2 - 1) / 29 * 100)</code> (Nota 100 se Lote 2 for zero).<br>
+                        <strong>Regra Operacional:</strong> Deve ser entregue em até 19 dias (limite antes da produção de 30 dias para cumprir os 49 dias do prazo do México).
+                    </span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">🛡️ Garantia de Qualidade</span>
+                    <span class="detail-desc">
+                        <strong>Regra Eliminatória:</strong> Mandatório estar ativada ("Sim" - aço certificado). A ausência de garantia reprova o contrato imediatamente por alto risco.
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Security Acknowledgment Modal (Obscures the dashboard until acknowledged) -->
+<div class="modal-overlay active" id="securityModal" style="z-index: 2000; background: rgba(2, 6, 23, 0.97); backdrop-filter: blur(30px);">
+    <div class="modal-content" style="max-width: 440px; border-color: rgba(244, 63, 94, 0.15); text-align: center; padding: 2.5rem 2rem;">
+        
+        <!-- Glowing Padlock SVG -->
+        <svg class="lock-icon" viewBox="0 0 24 24" width="44" height="44" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+
+        <div class="system-status">
+            <span class="status-dot"></span>
+            <span class="status-text font-mono">AMBIENTE DE NEGOCIAÇÃO CRIPTOGRAFADO</span>
+        </div>
+
+        <h3 class="modal-title" style="border: none; text-align: center; font-weight: 700; font-size: 1.35rem; margin-bottom: 0.75rem; letter-spacing: 0.5px;">
+            Controle de Confidencialidade
+        </h3>
+        
+        <div class="modal-body" style="text-align: center; padding: 0;">
+            <p style="font-size: 0.85rem; line-height: 1.6; color: var(--text-secondary); margin-bottom: 1.75rem;">
+                As informações contidas neste simulador são confidenciais e contêm dados estratégicos de custo e margem da SuperMotors S.A.
+            </p>
+            <div class="privacy-warning-box">
+                <span class="warning-icon">⚠️</span>
+                <span class="warning-text">Certifique-se de que a visualização desta tela é estritamente privada neste momento.</span>
+            </div>
+            <button id="ackSecurityBtn">
+                ACESSAR SIMULADOR
+            </button>
+        </div>
     </div>
 </div>
 

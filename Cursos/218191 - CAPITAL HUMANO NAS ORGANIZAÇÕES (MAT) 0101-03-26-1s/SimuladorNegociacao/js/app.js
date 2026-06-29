@@ -232,11 +232,16 @@ function update() {
     // Compliance flags
     const isL1QtyOk = l1Qty >= 30;
     const isL1TimeOk = l1Del <= 7;
-    const isL2TimeOk = l2Del <= 19;
+    const isL2TimeOk = l2Qty === 0 || l2Del <= 19; // If Lote 2 has 0 tons, delivery time is irrelevant
     const isTotalQtyOk = totalQty >= 50;
     const isPriceOk = price <= 5000;
     const isPaymentOk = paymentTime >= 30;
     const isQualityOk = qualityAssured;
+    
+    // Payment term compliance or price compensation (assuming 12% annual cost of capital)
+    const priceDiscount = (5000 - price) * totalQty;
+    const paymentLoss = totalCost * Math.max(0, 30 - paymentTime) * 0.00033;
+    const isPaymentCompensated = isPaymentOk || (price < 5000 && priceDiscount >= paymentLoss);
     
     // Veredicto Logic
     let state = 'v-ok'; // v-ok, v-warn, v-fail
@@ -247,8 +252,8 @@ function update() {
         state = 'v-fail';
         verText = 'RECUSAR PROPOSTA';
     } 
-    // Commercial alert conditions (operational ok, but pricing or terms are subpar)
-    else if (!isPriceOk || !isPaymentOk) {
+    // Commercial alert conditions (operational ok, but pricing or terms are subpar and not compensated)
+    else if (!isPriceOk || !isPaymentCompensated) {
         state = 'v-warn';
         verText = 'ALERTA: NEGOCIAR COMERCIAL';
     }
@@ -256,21 +261,27 @@ function update() {
     // --- Update UI Checklist ---
     const updateCheck = (id, isOk, okMsg, failMsg) => {
         const el = document.getElementById(id);
+        const text = isOk ? okMsg : failMsg;
         if (isOk) {
             el.className = 'check-item ok';
-            el.innerHTML = `<span class="icon font-mono">✓</span> ${okMsg}`;
+            el.innerHTML = `<span class="icon font-mono">✓</span><span class="check-text">${text}</span>`;
         } else {
             el.className = 'check-item fail';
-            el.innerHTML = `<span class="icon font-mono">✗</span> ${failMsg}`;
+            el.innerHTML = `<span class="icon font-mono">✗</span><span class="check-text">${text}</span>`;
         }
     };
     
     updateCheck('chk-quality', isQualityOk, 'Garantia de qualidade confirmada', 'Sem garantia de qualidade (Risco Crítico)');
     updateCheck('chk-l1-qty', isL1QtyOk, `Lote 1 Mínimo de 30t atendido (${l1Qty}t)`, `Lote 1 abaixo de 30t (${l1Qty}t)`);
     updateCheck('chk-l1-time', isL1TimeOk, `Prazo Lote 1 dentro de 7d (${l1Del}d)`, `Prazo Lote 1 excede 7d (${l1Del}d)`);
-    updateCheck('chk-l2-time', isL2TimeOk, `Prazo Lote 2 dentro dos 19d limite (${l2Del}d)`, `Prazo Lote 2 excede 19d (${l2Del}d)`);
+    if (l2Qty === 0) {
+        updateCheck('chk-l2-time', true, 'Lote 2 dispensado (Demanda suprida no Lote 1)', '');
+    } else {
+        updateCheck('chk-l2-time', isL2TimeOk, `Prazo Lote 2 dentro dos 19d limite (${l2Del}d)`, `Prazo Lote 2 excede 19d (${l2Del}d)`);
+    }
     updateCheck('chk-total-qty', isTotalQtyOk, `Volume total de 50t garantido (${totalQty}t)`, `Volume total insuficiente (${totalQty}t / 50t)`);
     updateCheck('chk-price', isPriceOk, `Preço viável vs Pucaço (R$ ${price.toLocaleString('pt-BR', {minimumFractionDigits: 2})})`, `Preço acima do Benchmark (R$ ${price.toLocaleString('pt-BR', {minimumFractionDigits: 2})})`);
+    updateCheck('chk-payment', isPaymentCompensated, paymentTime >= 30 ? `Prazo de faturamento viável (${paymentTime}d)` : `Prazo de ${paymentTime}d compensado pelo desconto`, `Prazo de faturamento de ${paymentTime}d insuficiente (Sem compensação)`);
 
     // --- Update Verdict Container Glow and Theme ---
     const verdContainer = document.getElementById('verdict-container');
@@ -305,7 +316,11 @@ function update() {
     const kpiL2 = document.getElementById('kpi-l2');
     const valL2 = document.getElementById('val-l2');
     const subL2 = document.getElementById('sub-l2');
-    if (!isL2TimeOk) {
+    if (l2Qty === 0) {
+        kpiL2.className = 'kpi-card status-ok';
+        valL2.innerText = 'DISPENSADO';
+        subL2.innerText = 'Volume total alocado no Lote 1';
+    } else if (!isL2TimeOk) {
         kpiL2.className = 'kpi-card status-fail';
         valL2.innerText = 'CRONOGRAMA ADIADO';
         subL2.innerText = `Entrega em ${l2Del} dias (Limite 19d)`;
@@ -340,7 +355,11 @@ function update() {
     valPayment.innerText = paymentTime === 0 ? 'À VISTA' : `${paymentTime} DIAS PGTO`;
     if (!isPaymentOk) {
         kpiPayment.className = 'kpi-card status-warn';
-        subPayment.innerText = 'Pior que a Base. Exigir redução de preço!';
+        if (price < 5000) {
+            subPayment.innerText = 'Pior que a Base, mas compensado pelo desconto';
+        } else {
+            subPayment.innerText = 'Pior que a Base. Exigir redução de preço!';
+        }
     } else {
         kpiPayment.className = 'kpi-card status-ok';
         subPayment.innerText = paymentTime === 30 ? 'Padrão da base mantido' : 'Fluxo de caixa otimizado';
@@ -349,6 +368,7 @@ function update() {
     // --- Update Chart.js Graphics ---
     if (costChart && radarChart && doughnutChart) {
         // 1. Cost Bar Chart Update
+        costChart.data.datasets[0].data[0] = 250000; // Pucaço (Base) constant cost of 250k
         costChart.data.datasets[0].data[1] = totalCost;
         
         // Pick proper gradient for current offer bar
@@ -376,6 +396,62 @@ function update() {
         let deficit = Math.max(0, 50 - totalQty);
         doughnutChart.data.datasets[0].data = [l1Qty, l2Qty, deficit];
         doughnutChart.update();
+    }
+    
+    // --- Pontuação de Negociação (Gamificação) ---
+    // 1. Preço: R$ 4000 (100%) a R$ 6000 (0%)
+    let sPrice = Math.max(0, Math.min(100, 100 - ((price - 4000) / 2000 * 100)));
+    
+    // 2. Pagamento: 0 dias (0%) a 60 dias (100%)
+    let sPayment = Math.max(0, Math.min(100, paymentTime / 60 * 100));
+    
+    // 3. Prazo Lote 1: 15 dias (0%) a 1 dia (100%)
+    let sL1Time = 0;
+    if (l1Del <= 15) {
+        sL1Time = Math.max(0, Math.min(100, 100 - ((l1Del - 1) / 14 * 100)));
+    }
+    
+    // 4. Prazo Lote 2: 30 dias (0%) a 1 dia (100%)
+    let sL2Time = 100; // Default to 100% if Lote 2 quantity is 0
+    if (l2Qty > 0 && l2Del <= 30) {
+        sL2Time = Math.max(0, Math.min(100, 100 - ((l2Del - 1) / 29 * 100)));
+    } else if (l2Qty > 0 && l2Del > 30) {
+        sL2Time = 0;
+    }
+    
+    // Weighted overall score
+    let overallScore = (sPrice * 0.40) + (sPayment * 0.20) + (sL1Time * 0.20) + (sL2Time * 0.20);
+    
+    // Apply 70% penalty if the deal fails operational checklist constraints (Veredicto Vermelho)
+    if (state === 'v-fail') {
+        overallScore = overallScore * 0.3;
+    }
+    
+    // Update Score UI elements
+    const scoreBar = document.getElementById('score-bar');
+    const scoreVal = document.getElementById('score-value');
+    if (scoreBar && scoreVal) {
+        const roundedScore = Math.round(overallScore);
+        scoreVal.innerText = `${roundedScore}%`;
+        scoreBar.style.width = `${overallScore}%`;
+        
+        // Apply dynamic theme colors and glows
+        if (state === 'v-fail') {
+            scoreBar.style.background = 'var(--danger)';
+            scoreBar.style.boxShadow = '0 0 10px var(--danger-glow)';
+            scoreVal.style.color = 'var(--danger)';
+            scoreVal.style.textShadow = '0 0 10px var(--danger-glow)';
+        } else if (state === 'v-warn') {
+            scoreBar.style.background = 'var(--warning)';
+            scoreBar.style.boxShadow = '0 0 10px var(--warning-glow)';
+            scoreVal.style.color = 'var(--warning)';
+            scoreVal.style.textShadow = '0 0 10px var(--warning-glow)';
+        } else {
+            scoreBar.style.background = 'var(--success)';
+            scoreBar.style.boxShadow = '0 0 10px var(--success-glow)';
+            scoreVal.style.color = 'var(--success)';
+            scoreVal.style.textShadow = '0 0 10px var(--success-glow)';
+        }
     }
 }
 
@@ -442,6 +518,219 @@ document.addEventListener('DOMContentLoaded', () => {
         // Close dropdown when clicking outside
         document.addEventListener('click', () => {
             dropdown.classList.remove('open');
+        });
+    }
+
+    // Auto-fill Benchmark on Click
+    const benchmarkPill = document.getElementById('benchmarkPill');
+    if (benchmarkPill) {
+        benchmarkPill.addEventListener('click', () => {
+            const priceInput = document.getElementById('price');
+            const paymentInput = document.getElementById('paymentTime');
+            const qualityInput = document.getElementById('qualityAssured');
+            const l1QtyInput = document.getElementById('l1Quantity');
+            const l1DelInput = document.getElementById('l1Delivery');
+            const l2QtyInput = document.getElementById('l2Quantity');
+            const l2DelInput = document.getElementById('l2Delivery');
+            
+            if (priceInput) priceInput.value = "5.000,00";
+            if (paymentInput) paymentInput.value = "30";
+            if (l1QtyInput) l1QtyInput.value = "20";
+            if (l1DelInput) l1DelInput.value = "15";
+            if (l2QtyInput) l2QtyInput.value = "30";
+            if (l2DelInput) l2DelInput.value = "15";
+            
+            if (qualityInput) {
+                qualityInput.value = "yes";
+                // Sync custom dropdown UI
+                const dropdownEl = document.getElementById('qualityDropdown');
+                if (dropdownEl) {
+                    dropdownEl.setAttribute('data-value', "yes");
+                    const selectedValEl = dropdownEl.querySelector('.selected-value');
+                    if (selectedValEl) selectedValEl.innerText = "Sim (Aço Certificado)";
+                    
+                    const options = dropdownEl.querySelectorAll('.dropdown-option');
+                    options.forEach(opt => {
+                        if (opt.getAttribute('data-value') === "yes") {
+                            opt.classList.add('selected');
+                        } else {
+                            opt.classList.remove('selected');
+                        }
+                    });
+                }
+            }
+            
+            update();
+        });
+    }
+
+    // Modal Logic for Formula Explanation
+    const formulaModal = document.getElementById('formulaModal');
+    const openModalBtn = document.getElementById('openModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    if (formulaModal && openModalBtn && closeModalBtn) {
+        openModalBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            formulaModal.classList.add('active');
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            formulaModal.classList.remove('active');
+        });
+
+        // Close modal when clicking outside of the content card
+        formulaModal.addEventListener('click', (e) => {
+            if (e.target === formulaModal) {
+                formulaModal.classList.remove('active');
+            }
+        });
+
+        // Close modal on Escape key press
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                formulaModal.classList.remove('active');
+            }
+        });
+    }
+
+    // Modal Logic for Benchmark Explanation
+    const benchmarkModal = document.getElementById('benchmarkModal');
+    const openBenchmarkModalBtn = document.getElementById('openBenchmarkModalBtn');
+    const closeBenchmarkModalBtn = document.getElementById('closeBenchmarkModalBtn');
+
+    if (benchmarkModal && openBenchmarkModalBtn && closeBenchmarkModalBtn) {
+        openBenchmarkModalBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Impede que o clique no "?" também dispare o preenchimento automático do Benchmark
+            benchmarkModal.classList.add('active');
+        });
+
+        closeBenchmarkModalBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            benchmarkModal.classList.remove('active');
+        });
+
+        // Close modal when clicking outside of the content card
+        benchmarkModal.addEventListener('click', (e) => {
+            if (e.target === benchmarkModal) {
+                benchmarkModal.classList.remove('active');
+            }
+        });
+
+        // Close modal on Escape key press
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                benchmarkModal.classList.remove('active');
+            }
+        });
+    }
+
+    // Modal Logic for SuperMotors Explanation
+    const superMotorsModal = document.getElementById('superMotorsModal');
+    const openSuperMotorsModalBtn = document.getElementById('openSuperMotorsModalBtn');
+    const closeSuperMotorsModalBtn = document.getElementById('closeSuperMotorsModalBtn');
+
+    if (superMotorsModal && openSuperMotorsModalBtn && closeSuperMotorsModalBtn) {
+        openSuperMotorsModalBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            superMotorsModal.classList.add('active');
+        });
+
+        closeSuperMotorsModalBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            superMotorsModal.classList.remove('active');
+        });
+
+        // Close modal when clicking outside of the content card
+        superMotorsModal.addEventListener('click', (e) => {
+            if (e.target === superMotorsModal) {
+                superMotorsModal.classList.remove('active');
+            }
+        });
+
+        // Close modal on Escape key press
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                superMotorsModal.classList.remove('active');
+            }
+        });
+    }
+
+    // Modal Logic for Timeline Explanation
+    const timelineModal = document.getElementById('timelineModal');
+    const openTimelineModalBtn = document.getElementById('openTimelineModalBtn');
+    const closeTimelineModalBtn = document.getElementById('closeTimelineModalBtn');
+    const timelineWidget = document.getElementById('timelineWidget');
+
+    if (timelineModal && openTimelineModalBtn && closeTimelineModalBtn) {
+        // Allow clicking either the widget or the ? button to open the modal
+        const openTimeline = (e) => {
+            e.stopPropagation();
+            timelineModal.classList.add('active');
+        };
+        openTimelineModalBtn.addEventListener('click', openTimeline);
+        if (timelineWidget) {
+            timelineWidget.addEventListener('click', openTimeline);
+        }
+
+        closeTimelineModalBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            timelineModal.classList.remove('active');
+        });
+
+        // Close modal when clicking outside of the content card
+        timelineModal.addEventListener('click', (e) => {
+            if (e.target === timelineModal) {
+                timelineModal.classList.remove('active');
+            }
+        });
+
+        // Close modal on Escape key press
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                timelineModal.classList.remove('active');
+            }
+        });
+    }
+
+    // Modal Logic for Parameters Explanation
+    const paramsModal = document.getElementById('paramsModal');
+    const openParamsModalBtn = document.getElementById('openParamsModalBtn');
+    const closeParamsModalBtn = document.getElementById('closeParamsModalBtn');
+
+    if (paramsModal && openParamsModalBtn && closeParamsModalBtn) {
+        openParamsModalBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            paramsModal.classList.add('active');
+        });
+
+        closeParamsModalBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            paramsModal.classList.remove('active');
+        });
+
+        // Close modal when clicking outside of the content card
+        paramsModal.addEventListener('click', (e) => {
+            if (e.target === paramsModal) {
+                paramsModal.classList.remove('active');
+            }
+        });
+
+        // Close modal on Escape key press
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                paramsModal.classList.remove('active');
+            }
+        });
+    }
+
+    // Modal Logic for Security Acknowledgement (Confidentiality Warning)
+    const securityModal = document.getElementById('securityModal');
+    const ackSecurityBtn = document.getElementById('ackSecurityBtn');
+
+    if (securityModal && ackSecurityBtn) {
+        ackSecurityBtn.addEventListener('click', () => {
+            securityModal.classList.remove('active');
         });
     }
 });
