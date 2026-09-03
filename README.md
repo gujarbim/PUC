@@ -1,1 +1,1 @@
-# Tecnologia da Informação para Negócios Digitais – Bacharelado
+# Tecnologia da Informação para Negócios Digitais
